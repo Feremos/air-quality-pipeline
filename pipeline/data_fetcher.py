@@ -1,8 +1,8 @@
 import requests
 import time
 
-BASE_SLEEP = 15  # Czas oczekiwania między zapytaniami (w sekundach)
-MAX_RETRIES = 3  # Maksymalna liczba prób ponowienia zapytania
+BASE_SLEEP = 15  
+MAX_RETRIES = 3  
 
 def safe_get(url, params=None):
     """Wysyła bezpieczne zapytanie GET z obsługą błędów i retry."""
@@ -11,7 +11,7 @@ def safe_get(url, params=None):
             print(f"Requesting: {url} (attempt {attempt})")
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
-            time.sleep(BASE_SLEEP)  # Limit API, nie przeciążaj serwera
+            time.sleep(BASE_SLEEP)  
             return response.json()
         except requests.RequestException as e:
             print(f"Błąd przy próbie {attempt}: {e}")
@@ -34,14 +34,13 @@ def get_stations_by_city_id(city_id, page_size=500):
         if not data:
             break
 
-        # Tutaj w oryginalnej dokumentacji może nie być klucza "Lista stacji pomiarowych" - prawdopodobnie jest to lista JSON od razu
-        # więc zamieniłem na data (listę)
+        
         all_stations = data if isinstance(data, list) else data.get("Lista stacji pomiarowych", data)
         filtered = [s for s in all_stations if s.get("Identyfikator miasta") == city_id]
         stations.extend(filtered)
 
         if len(all_stations) < page_size:
-            break  # Nie ma więcej stron
+            break  
         page += 1
 
     return stations
@@ -50,7 +49,7 @@ def get_sensors_for_station(station_id, page_size=500):
     """Zwraca listę sensorów dla danej stacji."""
     url = f"https://api.gios.gov.pl/pjp-api/v1/rest/station/sensors/{station_id}?page=0&size={page_size}"
     data = safe_get(url)
-    # Podobnie tutaj: jeśli API zwraca listę, użyjemy od razu
+    
     return data if isinstance(data, list) else data.get("Lista stanowisk pomiarowych dla podanej stacji", [])
 
 def get_sensor_measurements(sensor_id, date_from, date_to, page_size=500):
@@ -73,6 +72,7 @@ def get_sensor_measurements(sensor_id, date_from, date_to, page_size=500):
         total_pages = data.get("totalPages")
         if total_pages is None or page >= int(total_pages) - 1:
             break
+
 
         page += 1
 
