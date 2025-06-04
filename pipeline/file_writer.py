@@ -1,5 +1,6 @@
 import csv
 import os
+import json
 
 def save_measurements_to_csv(path, filename, data):
     os.makedirs(path, exist_ok=True)
@@ -8,3 +9,10 @@ def save_measurements_to_csv(path, filename, data):
         writer = csv.writer(f)
         writer.writerow(["datetime", "value"])
         writer.writerows(data)
+
+def save_stations_to_json(path, filename, stations):
+    os.makedirs(path, exist_ok=True)
+    filepath = os.path.join(path, filename)
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(stations, f, ensure_ascii=False, indent=4)
+
