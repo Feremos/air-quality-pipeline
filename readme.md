@@ -2,20 +2,21 @@
 
 Module responsible for GIOS PM 10 and PM 2.5 data downloading from sensors in Kielce. TO DO: what it outputs
 
-## Struktura projektu
-
-your-project/
+## Module structure
+```
+dataDownloading/
 ├── pipeline/
-│ ├── init.py
-│ ├── main.py
-│ ├── data_fetcher.py
-│ └── file_writer.py
-├── requirements.txt
+│   ├── main.py
+│   ├── data_fetcher.py
+│   └── file_writer.py
+├── config.yaml
 ├── .gitignore
+├── requirements.txt
 └── README.md
+```
 
 
-## Jak uruchomić projekt
+## How to run the module
 
 1. Create and activate an virtual enviroment
 
