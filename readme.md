@@ -88,8 +88,8 @@ Each CSV contains:
 
 ### Modes
 
-- In **historical mode**, files cover long time periods from `date_from` (e.g. 2025-01-01) to `date_to` (usually yesterday).
-- In **current mode**, files cover shorter date ranges as defined in `config.yaml`.
+- In **historical mode**, set 'date_from' and 'date_to' to whatever range you want to get data for.
+- In **current mode**, set 'date_from' to yesterdays and 'date_to' to todays date to get current measurments.
 
 
 
