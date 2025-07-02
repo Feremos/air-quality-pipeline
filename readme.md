@@ -89,7 +89,7 @@ Each CSV contains:
 ### Modes
 
 - In **historical mode**, set 'date_from' and 'date_to' to whatever range you want to get data for.
-- In **current mode**, set 'date_from' to yesterdays and 'date_to' to todays date to get current measurments.
+- In **current mode**, set 'date_from' to yesterdays and 'date_to' to todays date to get current measurments .
 
 
 
