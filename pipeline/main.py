@@ -9,12 +9,13 @@ from pipeline.file_writer import (
     save_measurements_to_csv,
     save_stations_to_json
 )
+from pipeline.elevation import get_elevation  # Nowa funkcja!
+
+def load_config(config_path="config.yaml"):
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 def main():
-    def load_config(config_path="config.yaml"):
-        with open(config_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
-        
     config = load_config()
     city_id = config["city_id"]
     city_name = config["city_name"]
@@ -30,17 +31,49 @@ def main():
         print(f"Brak stacji dla miasta ID={city_id}")
         return
 
-    # --- Zapis stacji do JSON ---
+    # --- Dodawanie wysokości ---
+      # --- Dodajemy wysokość do stacji ---
+    for station in stations:
+        try:
+            lat = float(station["WGS84 φ N"])
+            lon = float(station["WGS84 λ E"])
+            elevation = get_elevation(lat, lon)
+            station["Wysokość n.p.m. [m]"] = elevation
+        except (ValueError, KeyError):
+            station["Wysokość n.p.m. [m]"] = None
+
     save_stations_to_json(base_path, "stations.json", stations)
     print(f"Zapisano dane o stacjach do stations.json")
 
-    # --- Iteracja po stacjach i sensorach ---
+    # --- Zbierzemy wszystkie sensory ---
+    all_sensors = []
+
     for station in stations:
         station_id = station["Identyfikator stacji"]
         station_name = station["Nazwa stacji"].replace(" ", "_")
 
         sensors = get_sensors_for_station(station_id)
-        sensors_pm = [s for s in sensors if s["Wskaźnik - kod"] in ("PM10", "PM2.5")]
+        if not sensors:
+            print(f"Brak sensorów dla stacji {station_name}")
+            continue
+
+        # Dodajemy do listy sensorów dodatkowo nazwę stacji i jej elevation
+        for sensor in sensors:
+            sensor_copy = sensor.copy()
+            sensor_copy["Nazwa stacji"] = station["Nazwa stacji"]
+            sensor_copy["Wysokość n.p.m. [m]"] = station.get("Wysokość n.p.m. [m]")
+            all_sensors.append(sensor_copy)
+
+    # --- Zapis sensorów do JSON ---
+    save_stations_to_json(base_path, "sensors.json", all_sensors)
+    print(f"Zapisano dane o sensorach do sensors.json")
+
+    # --- Dalej idziemy jak wcześniej z pomiarami ---
+    for station in stations:
+        station_id = station["Identyfikator stacji"]
+        station_name = station["Nazwa stacji"].replace(" ", "_")
+
+        sensors_pm = [s for s in all_sensors if s.get("Identyfikator stanowiska") and s.get("Nazwa stacji") == station["Nazwa stacji"] and s["Wskaźnik - kod"] in ("PM10", "PM2.5")]
 
         if not sensors_pm:
             print(f"Stacja {station_name} nie ma sensorów PM10 ani PM2.5, pomijam")
